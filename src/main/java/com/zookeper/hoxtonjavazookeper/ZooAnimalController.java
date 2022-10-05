@@ -1,46 +1,62 @@
 package com.zookeper.hoxtonjavazookeper;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ZooAnimalController {
+    @Autowired
+    private ZooAnimalRepository ZooAnimalRepository;
 
     @GetMapping("/animals")
-    public ArrayList<Animal> getAllAnimals() {
-        ArrayList<Animal> animals = new ArrayList<>();
-        Animal first = new Animal(1, "Misty", "Panthera", "Northwestern China", false);
-        Animal second = new Animal(2, "Dumbo", "Elephant", "Africa", true);
-        Animal third = new Animal(3, "Clara Jane", "Zebra", "Africa", true);
-        Animal fourth = new Animal(3, "Smurfy", "Hippo", "eastern Africa", true);
-        animals.add(first);
-        animals.add(second);
-        animals.add(third);
-        animals.add(fourth);
+    public List<Animals> getAllAnimals() {
+        return ZooAnimalRepository.findAll();
+    }
 
-        return animals;
+    @PostMapping("/animals")
+    public Animals createNewAnimal(@RequestBody Animals animalData) {
+        return ZooAnimalRepository.save(animalData);
+    }
+
+    @DeleteMapping("/animals/{id}")
+    public String deleteAnimal(@PathVariable Integer id) {
+        ZooAnimalRepository.deleteById(id);
+        return "ANIMAL SUCCESSFULLY DELETED!";
+    }
+
+    @PatchMapping("/animals/{id}")
+    public Animals updateAnimal(@RequestBody Animals AnimalsData, @PathVariable Integer id) {
+        AnimalsData.id = id;
+        return ZooAnimalRepository.save(AnimalsData);
     }
 }
 
 @Entity
-class Animal {
+class Animals {
     @Id
+    @GeneratedValue
     public Integer id;
     public String name;
     public String species;
     public String origin;
     public boolean isHungry;
 
-    public Animal(Integer id, String name, String species, String origin, boolean isHungry) {
-        this.id = id;
-        this.name = name;
-        this.species = species;
-        this.origin = origin;
-        this.isHungry = isHungry;
+    public Animals() {
     }
+}
+
+interface ZooAnimalRepository extends JpaRepository<Animals, Integer> {
 }
